@@ -182,7 +182,17 @@ function Nav() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", minHeight: 80, flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "14px", flex: "1 1 auto", minWidth: 0 }}>
           <img src={logoImg} alt="KR Industries logo" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "cover" }} />
-          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 24, letterSpacing: 1.2, color: COLORS.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <span style={{
+            fontFamily: "'Syne', sans-serif",
+            fontWeight: 800,
+            fontSize: isMobile ? 18 : 24,
+            letterSpacing: 1.2,
+            color: COLORS.text,
+            whiteSpace: isMobile ? "normal" : "nowrap",
+            overflow: isMobile ? "visible" : "hidden",
+            textOverflow: isMobile ? "clip" : "ellipsis",
+            maxWidth: isMobile ? "calc(100% - 120px)" : undefined,
+          }}>
             KR INDUSTRIES
           </span>
         </div>
@@ -211,8 +221,7 @@ function Nav() {
               minHeight: 44,
             }}
             aria-expanded={menuOpen}
-            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
-          >
+            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}>
             <span style={{ display: "inline-flex", flexDirection: "column", gap: 3 }}>
               <span style={{ width: 18, height: 2, background: COLORS.text, borderRadius: 1 }} />
               <span style={{ width: 18, height: 2, background: COLORS.text, borderRadius: 1 }} />
