@@ -120,8 +120,15 @@ function useMediaQuery(query) {
   useEffect(() => {
     const media = window.matchMedia(query);
     const handler = (event) => setMatches(event.matches);
-    media.addEventListener("change", handler);
-    return () => media.removeEventListener("change", handler);
+    if (media.addEventListener) {
+      media.addEventListener("change", handler);
+      return () => media.removeEventListener("change", handler);
+    }
+    if (media.addListener) {
+      media.addListener(handler);
+      return () => media.removeListener(handler);
+    }
+    return undefined;
   }, [query]);
   return matches;
 }
@@ -163,18 +170,19 @@ function Nav() {
 
   return (
     <nav style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      background: scrolled ? "rgba(15,20,32,0.95)" : "transparent",
-      backdropFilter: scrolled ? "blur(16px)" : "none",
-      borderBottom: scrolled ? `1px solid ${COLORS.border}` : "none",
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000,
+      background: scrolled || menuOpen ? "rgba(15,20,32,0.96)" : "transparent",
+      backdropFilter: scrolled || menuOpen ? "blur(16px)" : "none",
+      borderBottom: scrolled || menuOpen ? `1px solid ${COLORS.border}` : "none",
+      boxShadow: scrolled || menuOpen ? "0 24px 60px rgba(0,0,0,0.18)" : "none",
       padding: isMobile ? "0.75rem 1rem" : "0 2rem",
-      transition: "all 0.4s ease",
+      transition: "all 0.3s ease",
       display: "flex", flexDirection: "column", alignItems: "stretch",
     }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "14px", minHeight: 80 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", minHeight: 80, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px", flex: "1 1 auto", minWidth: 0 }}>
           <img src={logoImg} alt="KR Industries logo" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "cover" }} />
-          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 24, letterSpacing: 1.2, color: COLORS.text }}>
+          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 24, letterSpacing: 1.2, color: COLORS.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             KR INDUSTRIES
           </span>
         </div>
@@ -191,21 +199,26 @@ function Nav() {
               padding: "10px 14px",
               borderRadius: 10,
               border: "1px solid rgba(255,255,255,0.12)",
-              background: "rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.08)",
               color: COLORS.text,
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
+              flexShrink: 0,
+              position: "relative",
+              zIndex: 101,
+              minWidth: 44,
+              minHeight: 44,
             }}
             aria-expanded={menuOpen}
             aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
           >
-            {menuOpen ? "Close" : "Menu"}
             <span style={{ display: "inline-flex", flexDirection: "column", gap: 3 }}>
               <span style={{ width: 18, height: 2, background: COLORS.text, borderRadius: 1 }} />
               <span style={{ width: 18, height: 2, background: COLORS.text, borderRadius: 1 }} />
               <span style={{ width: 18, height: 2, background: COLORS.text, borderRadius: 1 }} />
             </span>
+            {menuOpen && <span style={{ lineHeight: 1 }}>{menuOpen ? "Close" : "Menu"}</span>}
           </button>
         )}
       </div>
