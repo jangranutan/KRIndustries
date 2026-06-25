@@ -112,6 +112,20 @@ function useInView(threshold = 0.15) {
   return [ref, inView];
 }
 
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia(query).matches : false
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    const handler = (event) => setMatches(event.matches);
+    media.addEventListener("change", handler);
+    return () => media.removeEventListener("change", handler);
+  }, [query]);
+  return matches;
+}
+
 function FadeIn({ children, delay = 0, style = {} }) {
   const [ref, inView] = useInView();
   return (
@@ -128,6 +142,9 @@ function FadeIn({ children, delay = 0, style = {} }) {
 
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 860px)");
+  const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", fn);
@@ -150,18 +167,57 @@ function Nav() {
       background: scrolled ? "rgba(15,20,32,0.95)" : "transparent",
       backdropFilter: scrolled ? "blur(16px)" : "none",
       borderBottom: scrolled ? `1px solid ${COLORS.border}` : "none",
-      padding: "0 2rem",
+      padding: isMobile ? "0.75rem 1rem" : "0 2rem",
       transition: "all 0.4s ease",
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      height: "80px",
+      display: "flex", flexDirection: "column", alignItems: "stretch",
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-        <img src={logoImg} alt="KR Industries logo" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "cover" }} />
-        <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 24, letterSpacing: 1.2, color: COLORS.text }}>
-          KR INDUSTRIES
-        </span>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "14px", minHeight: 80 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          <img src={logoImg} alt="KR Industries logo" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "cover" }} />
+          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 24, letterSpacing: 1.2, color: COLORS.text }}>
+            KR INDUSTRIES
+          </span>
+        </div>
+
+        {isMobile && (
+          <button
+            type="button"
+            onClick={() => setMenuOpen(open => !open)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              padding: "10px 14px",
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.12)",
+              background: "rgba(255,255,255,0.06)",
+              color: COLORS.text,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+          >
+            {menuOpen ? "Close" : "Menu"}
+            <span style={{ display: "inline-flex", flexDirection: "column", gap: 3 }}>
+              <span style={{ width: 18, height: 2, background: COLORS.text, borderRadius: 1 }} />
+              <span style={{ width: 18, height: 2, background: COLORS.text, borderRadius: 1 }} />
+              <span style={{ width: 18, height: 2, background: COLORS.text, borderRadius: 1 }} />
+            </span>
+          </button>
+        )}
       </div>
-      <div style={{ display: "flex", gap: "2rem" }}>
+
+      <div style={{
+        display: isMobile ? (menuOpen ? "flex" : "none") : "flex",
+        flexDirection: isMobile ? "column" : "row",
+        gap: isMobile ? "0.75rem" : "2rem",
+        alignItems: isMobile ? "stretch" : "center",
+        marginTop: isMobile ? "0.75rem" : 0,
+        paddingBottom: isMobile ? "0.75rem" : 0,
+      }}>
         {links.map(link => (
           <NavLink
             key={link.label}
@@ -173,7 +229,11 @@ function Nav() {
               textDecoration: "none",
               transition: "color 0.2s",
               letterSpacing: 0.5,
+              display: isMobile ? "block" : undefined,
+              padding: isMobile ? "0.75rem 0" : undefined,
+              borderBottom: isMobile ? "1px solid rgba(255,255,255,0.08)" : undefined,
             })}
+            onClick={() => { if (isMobile) setMenuOpen(false); }}
           >
             {link.label}
           </NavLink>
@@ -567,6 +627,7 @@ function Contact() {
   const [form, setForm] = useState({ name: "", company: "", phone: "", email: "", product: "", message: "" });
   const [status, setStatus] = useState("idle"); // idle | sending | success | error
   const [errors, setErrors] = useState({});
+  const isMobile = useMediaQuery("(max-width: 900px)");
 
   const inputStyle = (field) => ({
     width: "100%", padding: "10px 14px", borderRadius: 8,
@@ -614,7 +675,7 @@ function Contact() {
         <p style={{ color: COLORS.muted, fontSize: 15, marginBottom: "3rem" }}>Send us an enquiry and we'll get back to you within one business day.</p>
       </FadeIn>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 24, alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1.4fr", gap: 24, alignItems: "start" }}>
 
         {/* Info column */}
         <FadeIn>
